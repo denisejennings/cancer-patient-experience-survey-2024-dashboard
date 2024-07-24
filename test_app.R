@@ -4,9 +4,6 @@
 # App file
 # -------------------------------------------------------------------------
 
-# Set working diretory to source files
-setwd("/conf/bss/CPES/2024/Dashboard/R Shiny")
-
 # Source required files to create app
 source("test_global.R")
 source("test_dashboard_ui.R")
