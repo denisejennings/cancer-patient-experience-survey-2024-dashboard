@@ -5,9 +5,9 @@
 # -------------------------------------------------------------------------
 
 # Source required files to create app
-source("test_global.R")
-source("test_dashboard_ui.R")
-source("test_dashboard_server.R")
+source("scpes_global.R")
+source("scpes_dashboard_ui.R")
+source("scpes_dashboard_server.R")
 
 shinyApp(ui, server)
 
