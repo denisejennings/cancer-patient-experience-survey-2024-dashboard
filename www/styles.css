@@ -1,0 +1,196 @@
+/* CSS styles used in the shiny app */
+
+
+/* to avoid red text error messages in the whole app, take out for testing*/
+.shiny-output-error { visibility: hidden; }
+.shiny-output-error:before { visibility: hidden; }
+
+/* Style sidebars/well panels */
+.well {
+  background-color:#ffffff;
+  border: 0 solid #336699;
+  padding: 5px;
+  box-shadow: none;
+
+}
+
+
+
+
+/* NAVIGATION BAR/HEADER */
+
+/* Changes colour of Navigation bar to PHS purple */
+.navbar-default {
+  background-color: #3F3685;
+  border: none;
+
+}
+
+/* Creates a white background for the image and rounded edges */
+.navbar-brand, .navbar-default:hover .navbar-brand:hover {
+  background-color: #ffffff;
+  padding: 10px;
+
+}
+
+/* Changes font to white in nav bar */
+.navbar-default .navbar-nav > li > a {
+  color: #ffffff;
+
+}
+
+/* Changes colour of active (clicked) tab on the nav bar and adds rounded corners */
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus, .navbar-default .navbar-nav > .active > a:hover {
+  color: #ffffff;
+  background-color: #312760;
+  border-radius: 10px 10px 0 0;
+
+}
+
+/* Style the tab when hovered over */
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+  color: #ffffff;
+  background-color: #5343a3;
+  border-radius: 10px 10px 0 0;
+
+}
+
+
+
+
+/* INFO BUTTONS */
+
+/* Change the buttons to light blue background with dark blue font - must go above the radio button styling otherwise it is overridden */
+.btn:not(.dropdown-toggle):not(.btn-primary):not(.bs-select-all):not(.bs-deselect-all):not(.radiobtn) {
+  margin: 0;
+  font-weight: bold;
+  background-color: #E6F2FB;
+  color: #0078D4;
+  border-color: #B3D7F2;
+
+}
+
+
+
+
+
+/* FILTERS */
+
+/* this adds light purple background behind the title of the data type selectors */
+.form-group {
+  background-color: #ECEBF3;
+  border-radius: 10px;
+
+}
+
+
+/* this adds a light purple shading to behind the drop-down boxes to make them standout */
+.shiny-input-container:not(.shiny-input-container-inline):not(.shiny-input-radiogroup) {
+  width: auto;
+  background-color: #ECEBF3;
+  padding: 5px;
+  border-radius: 10px;
+  margin: 0;
+
+}
+
+/* This removes the extra padding around some of the filters */
+.selectize-control {
+  margin: 0;
+
+}
+
+
+
+/* These add padding around the title of the radio buttons (can't do globally using .control-label as
+it adds padding to the drop downs which throws off alignment) */
+#timeperiod-label {
+  padding: 5px;
+
+}
+
+
+/*this removes the select all option from the location (pickerInput) drop-down */
+.bs-select-all {
+  display: none;
+
+}
+
+/*this makes the HB sub-headings in the location (pickerInput) drop-down bold */
+.dropdown-header .text {
+  font-weight: bolder;
+  font-size: small;
+
+}
+
+
+
+
+/* SIDE BAR SELECTORS */
+
+/* Changes the background colours of the buttons to match PHS colours, and adds rounded corners */
+.btn-primary {
+  color: #3F3685;
+  font-weight: bold;
+  background-color: #ECEBF3;
+  border-color: #ffffff;
+  border-radius: 10px;
+  padding: 5px;
+
+}
+
+
+/* This changes the colour of the button when you hover over it */
+.btn-primary:hover {
+  color: #ffffff;
+  font-weight: bold;
+  background-color: #433684;
+  border-color: #ffffff;
+
+}
+
+
+/* This defines the colour of the active (clicked) button */
+.btn-primary.active:focus, .btn-primary.active:hover {
+color: #ffffff;
+  background-color: #3F3685;
+  border-color: #ffffff;
+
+}
+
+/* This defines the colour of the button that is selected when you first go to the tab */
+.btn-primary.active, .btn-primary:active, .open>.dropdown-toggle.btn-primary {
+  color: #ffffff;
+  font-weight: bold;
+  background-color: #3F3685;
+  border-color: #ffffff;
+
+}
+
+/* This defines the colour of the button in the instant it is clicked  */
+.btn-primary:hover:focus:active {
+  color: #ffffff;
+  font-weight: bold;
+  background-color: #3F3685;
+  border-color: #ffffff;
+
+}
+
+
+
+/* FONT COLOURS AND TABLE FORMATS */
+
+/* Change font colour of all headers to PHS dark purple */
+h2, h3, h4, h5 {
+  color: #3F3685;
+  font-weight: bold;
+
+}
+
+/* Change font colour of table headers to PHS dark purple */
+th {
+  color: #3F3685;
+  font-weight: bold;
+
+}
+
