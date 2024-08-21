@@ -22,12 +22,20 @@ library(shinycssloaders)
 # Read in area data
 data_by_area <- readRDS("/conf/bss/CPES/2024/Output/analysis_output/dashboard_output_2024.rds") %>%
   clean_names() %>%
+  select(-question_text) %>%
+  rename(question_text = question_text_dashboard) %>%
+  mutate(response_text_dashboard = str_replace(response_text_dashboard,"No, social distancing measures prevented this","No (social distancing measures)"),
+         response_text_dashboard = str_replace(response_text_dashboard,"I did not need / want to bring someone with me","I did not need / want to"),
+         response_text_dashboard = str_replace(response_text_dashboard,"\\(cost, travel, anything else\\)",""),
+         response_text_dashboard = str_replace(response_text_dashboard,"Hospital restrictions prevented me from taking someone with me","Hospital restrictions prevented this"),
+         response_text_dashboard = str_replace(response_text_dashboard,"\\(transport unavailable / rush hour etc.\\)","")) %>%
+
   # order areas alphabetically (by level)
   mutate(report_area_name = factor(report_area_name, levels = c("Aberdeen Royal Infirmary", "Beatson West of Scotland Cancer Centre",
                                                                 "Edinburgh Cancer Centre", "NHS Ayrshire & Arran", "NHS Borders",
                                                                 "NHS Dumfries & Galloway", "NHS Fife", "NHS Forth Valley", "NHS Grampian",
                                                                 "NHS Greater Glasgow & Clyde", "NHS Highland", "NHS Lanarkshire", "NHS Lothian",
-                                                                "NHS Tayside", "National Facility", "Ninewells Hospital", "Raigmore Hospital",
+                                                                "NHS Tayside", "NHS Golden Jubilee", "Ninewells Hospital", "Raigmore Hospital",
                                                                 "North of Scotland (NOSCAN)", "South of Scotland (SCAN)",
                                                                 "West of Scotland (WOSCAN)", "Scotland"))) %>%
   arrange(report_area_name) %>%
@@ -38,6 +46,11 @@ data_by_area <- readRDS("/conf/bss/CPES/2024/Output/analysis_output/dashboard_ou
                                       level == "Network of residence" ~ paste(report_area_name, "(Network of residence)"),
                                       T ~ report_area_name))
 
+check_names <- data_by_area %>%
+  group_by(response_text_analysis, response_text_dashboard) %>%
+  summarise(count = n())  %>%
+  mutate(diff = if_else(response_text_analysis != response_text_dashboard,1,0),
+         length = nchar(response_text_dashboard))
 
 # Read in data for cancer groups
 data_by_cancer_group <- readRDS("/conf/bss/CPES/2024/Output/analysis_output/cancer_group_dashboard_output_2024.rds") %>%
@@ -86,7 +99,7 @@ level_list <- list(
   "NHS board of treatment" = c("NHS Ayrshire & Arran (Board of treatment)", "NHS Borders (Board of treatment)", "NHS Dumfries & Galloway (Board of treatment)",
                                "NHS Fife (Board of treatment)", "NHS Forth Valley (Board of treatment)", "NHS Grampian (Board of treatment)",
                                "NHS Greater Glasgow & Clyde (Board of treatment)", "NHS Highland (Board of treatment)", "NHS Lanarkshire (Board of treatment)",
-                               "NHS Lothian (Board of treatment)", "NHS Tayside (Board of treatment)", "National Facility (Board of treatment)"),
+                               "NHS Lothian (Board of treatment)", "NHS Tayside (Board of treatment)", "NHS Golden Jubilee (Board of treatment)"),
   "Cancer centre" = c("Aberdeen Royal Infirmary", "Beatson West of Scotland Cancer Centre", "Edinburgh Cancer Centre", "Ninewells Hospital", "Raigmore Hospital"))
 
 
