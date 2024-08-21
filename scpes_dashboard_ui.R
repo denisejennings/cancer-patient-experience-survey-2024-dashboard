@@ -6,8 +6,8 @@
 
 
 # Create main page with tabs and required CSS settings
-ui <- fluidPage(
-# secure_app( #uncomment if needing password protection
+ui <- #secure_app( #uncomment if needing password protection
+  fluidPage(
 tagList( #needed for shinyjs
   useShinyjs(),  # Include shinyjs
   navbarPage(id = "intabset", # id used for jumping between tabs
@@ -92,18 +92,56 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                conditionalPanel(
                                  condition= 'input.home_select == "info"',
                                  tagList(h3(tags$b("Further information")), br(),
-                                         h5(tags$b("Publications")),
+                                         h4(tags$b("Publications")),
                                          p("The full report can be found on the  ",
                                            tags$a(href="https://www.gov.scot/collections/scottish-cancer-patient-experience-survey/#2024survey",
                                                   "Scottish Government website (external website).", target="_blank")), br(),
 
-                                 h5(tags$b("Open data")),
-                                 p("The code used to help produce the analysis used in the publication and this dashboard can be accessed in the ",
+                                 h4(tags$b("SCPES Question Types")),
+                                 h5(tags$b("Per cent positive style questions")),
+                                 p("Responses to these questions have been categorised as positive, neutral or negative.
+                                   For further information about how responses were categorised, please see the ",
                                    tags$a(href="",
-                                          "SCPES 2024 GitHub repository (external website).", target="_blank")), br(),
+                                          "Analysis and Reporting” chapter of the Technical Report.", target="_blank")), br(),
 
-                                 h5(tags$b("Contact us")),
-                                 p("Please contact the ", tags$a(href="mailto:",
+                                 h5(tags$b("Information questions")),
+                                 p("Responses to some questions cannot be put on a positive/negative scale. For these questions the percentage
+                                   of people selecting each response for each question is shown."), br(),
+
+                                 h4(tags$b("Methodology")),
+                                 h5(tags$b("Weighting")),
+                                 p("Results at national, network and NHS Board level have been weighted. Results at Cancer Centre level have not
+                                   been weighted. Full details on the weighting methodology applied are provided in  ",
+                                   tags$a(href="",
+                                          "Annex D of the Technical Report.", target="_blank")), br(),
+
+                                 h5(tags$b("Comparing results")),
+                                 p("There is always a degree of uncertainty in survey results, caused by survey error or random variation.
+                                   The results are presented with 95% confidence intervals which describes the range in which the true value of
+                                   statistic is likely to be found."),
+                                 p("Confidence intervals allow comparisons to be made between statistics from different years' surveys or relating to
+                                   different areas. Where confidence intervals overlap, observed differences may be due to survey error or random variation.
+                                   Where confidence intervals do not overlap, the observed difference is said to be significant. Further details are available in ",
+                                   tags$a(href = "",
+                                          "Annex E of the Technical Report.", target = "_blank")), br(),
+
+                                 h5(tags$b("Variation in results")),
+                                 p("When interpreting these data, it is important to remember that some variation in results between different areas should be
+                                   expected. Variation in results could be caused by differences in local population characteristics, needs or geographical setting."), br(),
+
+                                 h5(tags$b("Percentages")),
+                                 p("All percentages have been rounded to two decimal places and are displayed to the nearest whole number; this means percentages may
+                                   not sum to exactly 100 in the charts shown in this dashboard."), br(),
+
+                                 h5(tags$b("Small numbers")),
+                                 p("Results for questions based on a small number of responses should be interpreted with care and so the number of responses for
+                                   each question has been provided for context. Local level results are only provided for local areas where at least 50 people within
+                                   that area responded to the survey and, at all levels of reporting, results for questions with fewer than 20 respondents have been
+                                   suppressed. This is to minimise the risk of an individual respondent being identified and to ensure that results are statistically
+                                   robust."), br(),
+
+                                 h4(tags$b("Contact us")),
+                                 p("Please contact the ", tags$a(href="mailto:patientexperience@gov.scot",
                                                                  "Scottish Goverment survey team"), "if you have any
                                  questions about this publication.")
                                  ) # tagList

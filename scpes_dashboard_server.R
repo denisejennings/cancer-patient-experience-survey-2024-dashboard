@@ -4,11 +4,18 @@
 # Server file
 # ------------------------------------------------------------------------------
 
+# Set password protection
+#credentials <- readRDS("admin/credentials.rds")
+
+
 ################################################################################
 # Reactive controls  -----------------------------------------------------------
 ################################################################################
 
 server <- function(input, output, session) {
+
+# Shinymanager Auth
+#res_auth <- secure_server(check_credentials = check_credentials(credentials))
 
   # Set the dropdown menu so only questions relevant to the survey section selected appear
   observeEvent(
@@ -107,29 +114,29 @@ server <- function(input, output, session) {
   output$area <- renderUI({
 
     area_chart_title <- paste0("2024 Survey Results for", " ", input$select_report, " ", "against", " ", input$select_comparator)
-    year_chart_title <- paste0("Survey Results for", " ", input$select_comparator, " ", "over time")
+    year_chart_title <- paste0("Survey Results for", " ", input$select_comparator, " ", "over time, where available")
 
     tagList(
       br(),
-      h3(tags$b(input$select_question)),
+      h3(tags$b(paste0(area_chart_title)),
       br(),
-      fluidRow(column(9, h4(tags$b(paste0(area_chart_title)))),
+      fluidRow(column(9, h4(tags$b(paste0(input$select_question)))),
                column(3, div(actionButton("ci_info","What are confidence intervals?",
                                           icon = icon('question-circle')), style = "float: right"))),
       withSpinner(plotlyOutput("plot")),
       br(),
-      h3(tags$b(input$select_question)),
-      br(),
-      p(tags$b("Note:"), "Where responses from previous years do not appear, the question is either not comparable
+      h3(tags$b(paste0(year_chart_title))),
+      fluidRow(column(12, tags$b("Note:"), "Where responses from previous years do not appear, the question is either not comparable
          between years, or is a new question for 2024"),
-      br(),
-      fluidRow(column(9, h4(tags$b(paste0(year_chart_title))))),
+               column(9, h4(tags$b(input$select_question))))),
       withSpinner(plotlyOutput("plot2")),
       column(3, download_data_UI(id = "download_area_data")),
       column(12, dataTableOutput("area_table")), br(), br()
     ) #tagList
 
   })
+
+
 
 # Repeat for Data by cancer group tab
   output$group <- renderUI({
@@ -139,19 +146,17 @@ server <- function(input, output, session) {
 
     tagList(
       br(),
-      h3(tags$b(input$group_select_question)),
+      h3(tags$b(paste0(group_chart_title)),
       br(),
-      fluidRow(column(9, h4(tags$b(paste0(group_chart_title)))),
+      fluidRow(column(9, h4(tags$b(paste0(input$group_select_question)))),
                column(3, div(actionButton("group_ci_info","What are confidence intervals?",
                                           icon = icon('question-circle')), style = "float: right"))),
       withSpinner(plotlyOutput("group_plot")),
       br(),
-      h3(tags$b(input$group_select_question)),
-      br(),
-      p(tags$b("Note:"), "Where responses from previous years do not appear, the question is either not comparable
+      h3(tags$b(paste0(year_chart_title))),
+      fluidRow(column(12, tags$b("Note:"), "Where responses from previous years do not appear, the question is either not comparable
          between years, or is a new question for 2024"),
-      br(),
-      fluidRow(column(9, h4(tags$b(paste0(year_chart_title))))),
+               column(9, h4(tags$b(input$group_select_question))))),
       withSpinner(plotlyOutput("group_plot2")),
       column(3, download_data_UI(id = "download_cancer_group_data")),
       column(12, dataTableOutput("cancer_group_table")), br(), br()
@@ -163,7 +168,7 @@ server <- function(input, output, session) {
 # Charts------------------------------------------------------------------------
 ################################################################################
 # Set question numbers for horizontal charts
-questions <- c("q07", "q46", "q48")
+questions <- c("Q07", "Q46", "Q48")
 
 # Survey results for comparing report areas
   output$plot <- renderPlotly({
@@ -181,7 +186,7 @@ questions <- c("q07", "q46", "q48")
         # add so reposse options are displayed in correct order
         mutate(response_text_dashboard = factor(response_text_dashboard,
                                                 levels = unique(response_text_dashboard)),
-               response_text_dashboard = case_when(question == "q55" ~ factor(response_text_dashboard,
+               response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
                                                                               levels = c("Positive", "Neutral", "Negative")),
                                                    T ~ response_text_dashboard))
 
@@ -191,12 +196,12 @@ questions <- c("q07", "q46", "q48")
         plot %>%
         plot_ly(x = ~wgt_percent*100, y = ~response_text_dashboard,
                 color = ~report_area_name,
-                colors = c("#3F3685", "#9F9BC2"),
+                colors = plot1_colours,
                 type = "bar",
                 marker = list(line = list(color = "black",
                                           width = 1)),
                 orientation = "h",
-                error_x = list(color = "#83BB26",
+                error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
           layout(yaxis = list(title = ""),
@@ -205,6 +210,7 @@ questions <- c("q07", "q46", "q48")
                               range = list(0, 100)),
                  bargroupgap = 0.15,
                  legend = list(orientation = "h", x=0, y=1.2))
+                 #margin = list(l = 80, t=5))
     }
 
       else {
@@ -212,11 +218,11 @@ questions <- c("q07", "q46", "q48")
        plot %>%
         plot_ly(x = ~response_text_dashboard, y = ~wgt_percent*100,
                 color = ~report_area_name,
-                colors = c("#3F3685", "#9F9BC2"),
+                colors = plot1_colours,
                 type = "bar",
                 marker = list(line = list(color = "black",
                                           width = 1)),
-                error_y = list(color = "#83BB26",
+                error_y = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
           layout(xaxis = list(title = ""),
@@ -225,6 +231,7 @@ questions <- c("q07", "q46", "q48")
                               range = list(0, 100)),
                  bargroupgap = 0.15,
                  legend = list(orientation = "h", x=0, y=1.2))
+                 #margin = list(l = 80, r=200))
     }
   }
   )  #plotly end
@@ -235,7 +242,7 @@ output$plot2 <- renderPlotly({
   plot2 <- time_data() %>%
     mutate(response_text_dashboard = factor(response_text_dashboard,
                                             levels = unique(response_text_dashboard)),
-           response_text_dashboard = case_when(question == "q55" ~ factor(response_text_dashboard,
+           response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
                                                                           levels = c("Positive", "Neutral", "Negative")),
                                                T ~ response_text_dashboard))
 
@@ -249,7 +256,7 @@ output$plot2 <- renderPlotly({
               marker = list(color = "#E9F2F3",
                             line = list(color = "black",
                                         width = 1)),
-              error_x = list(color = "black",
+              error_x = list(color = ci_colour,
                              array = ~(wgt_percent_upp_2015-wgt_percent_2015)*100,
                              arrayminus = ~(wgt_percent_2015-wgt_percent_low_2015)*100)) %>%
       add_trace(x = ~wgt_percent_2018*100, y = ~response_text_dashboard,
@@ -259,7 +266,7 @@ output$plot2 <- renderPlotly({
                 marker = list(color = "#8FBFC2",
                               line = list(color = "black",
                                           width = 1)),
-                error_x = list(color = "black",
+                error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp_2018-wgt_percent_2018)*100,
                                arrayminus = ~(wgt_percent_2018-wgt_percent_low_2018)*100)) %>%
       add_trace(x = ~wgt_percent*100, y = ~response_text_dashboard,
@@ -269,7 +276,7 @@ output$plot2 <- renderPlotly({
                 marker = list(color = "#1E7F84",
                               line = list(color = "black",
                                           width = 1)),
-                error_x = list(color = "black",
+                error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       layout(yaxis = list(title = ""),
@@ -289,7 +296,7 @@ output$plot2 <- renderPlotly({
               marker = list(color = "#E9F2F3",
                             line = list(color = "black",
                                         width = 1)),
-              error_y = list(color = "black",
+              error_y = list(color = ci_colour,
                              array = ~(wgt_percent_upp_2015-wgt_percent_2015)*100,
                              arrayminus = ~(wgt_percent_2015-wgt_percent_low_2015)*100)) %>%
       add_trace(x = ~response_text_dashboard, y = ~wgt_percent_2018*100,
@@ -298,7 +305,7 @@ output$plot2 <- renderPlotly({
                 marker = list(color = "#8FBFC2",
                               line = list(color = "black",
                                           width = 1)),
-                error_y = list(color = "black",
+                error_y = list(color = ci_colour,
                                array = ~(wgt_percent_upp_2018-wgt_percent_2018)*100,
                                arrayminus = ~(wgt_percent_2018-wgt_percent_low_2018)*100)) %>%
       add_trace(x = ~response_text_dashboard, y = ~wgt_percent*100,
@@ -307,7 +314,7 @@ output$plot2 <- renderPlotly({
                 marker = list(color = "#1E7F84",
                               line = list(color = "black",
                                           width = 1)),
-                error_y = list(color = "black",
+                error_y = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       layout(xaxis = list(title = ""),
@@ -332,7 +339,7 @@ output$group_plot <- renderPlotly({
     # ensures reponses appear in correct order
     mutate(response_text_dashboard = factor(response_text_dashboard,
                                             levels = unique(response_text_dashboard)),
-           response_text_dashboard = case_when(question == "q55" ~ factor(response_text_dashboard,
+           response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
                                                                           levels = c("Positive", "Neutral", "Negative")),
                                                T ~ response_text_dashboard))
 
@@ -347,7 +354,7 @@ output$group_plot <- renderPlotly({
               marker = list(color = "#3F3685",
                             line = list(color = "black",
                                         width = 1)),
-              error_x = list(color = "#83BB26",
+              error_x = list(color = ci_colour,
                              array = ~(wgt_percent_upp-wgt_percent)*100,
                              arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       add_trace(x = ~wgt_percent_all_cancers*100, y = ~response_text_dashboard,
@@ -357,7 +364,7 @@ output$group_plot <- renderPlotly({
                 marker = list(color = "#9F9BC2",
                               line = list(color = "black",
                                           width = 1)),
-                error_x = list(color = "#83BB26",
+                error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp_all_cancers-wgt_percent_all_cancers)*100,
                                arrayminus = ~(wgt_percent_all_cancers-wgt_percent_low_all_cancers)*100)) %>%
       layout(yaxis = list(title = ""),
@@ -377,7 +384,7 @@ output$group_plot <- renderPlotly({
               marker = list(color = "#3F3685",
                             line = list(color = "black",
                                         width = 1)),
-              error_y = list(color = "#83BB26",
+              error_y = list(color = ci_colour,
                              array = ~(wgt_percent_upp-wgt_percent)*100,
                              arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       add_trace(x = ~response_text_dashboard, y = ~wgt_percent_all_cancers*100,
@@ -386,7 +393,7 @@ output$group_plot <- renderPlotly({
                 marker = list(color = "#9F9BC2",
                               line = list(color = "black",
                                           width = 1)),
-                error_y = list(color = "#83BB26",
+                error_y = list(color = ci_colour,
                                array = ~(wgt_percent_upp_all_cancers-wgt_percent_all_cancers)*100,
                                arrayminus = ~(wgt_percent_all_cancers-wgt_percent_low_all_cancers)*100)) %>%
       layout(xaxis = list(title = ""),
@@ -406,7 +413,7 @@ output$group_plot2 <- renderPlotly({
   group_plot2 <- cancer_group_data() %>%
     mutate(response_text_dashboard = factor(response_text_dashboard,
                                             levels = unique(response_text_dashboard)),
-           response_text_dashboard = case_when(question == "q55" ~ factor(response_text_dashboard,
+           response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
                                                                           levels = c("Positive", "Neutral", "Negative")),
                                                T ~ response_text_dashboard))
 
@@ -420,7 +427,7 @@ output$group_plot2 <- renderPlotly({
               marker = list(color = "#E9F2F3",
                             line = list(color = "black",
                                         width = 1)),
-              error_x = list(color = "black",
+              error_x = list(color = ci_colour,
                              array = ~(wgt_percent_upp_2015-wgt_percent_2015)*100,
                              arrayminus = ~(wgt_percent_2015-wgt_percent_low_2015)*100)) %>%
       add_trace(x = ~wgt_percent_2018*100, y = ~response_text_dashboard,
@@ -430,7 +437,7 @@ output$group_plot2 <- renderPlotly({
                 marker = list(color = "#8FBFC2",
                               line = list(color = "black",
                                           width = 1)),
-                error_x = list(color = "black",
+                error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp_2018-wgt_percent_2018)*100,
                                arrayminus = ~(wgt_percent_2018-wgt_percent_low_2018)*100)) %>%
       add_trace(x = ~wgt_percent*100, y = ~response_text_dashboard,
@@ -440,7 +447,7 @@ output$group_plot2 <- renderPlotly({
                 marker = list(color = "#1E7F84",
                               line = list(color = "black",
                                           width = 1)),
-                error_x = list(color = "black",
+                error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       layout(yaxis = list(title = ""),
@@ -459,7 +466,7 @@ output$group_plot2 <- renderPlotly({
               marker = list(color = "#E9F2F3",
                             line = list(color = "black",
                                         width = 1)),
-              error_y = list(color = "black",
+              error_y = list(color = ci_colour,
                              array = ~(wgt_percent_upp_2015-wgt_percent_2015)*100,
                              arrayminus = ~(wgt_percent_2015-wgt_percent_low_2015)*100)) %>%
       add_trace(x = ~response_text_dashboard, y = ~wgt_percent_2018*100,
@@ -468,7 +475,7 @@ output$group_plot2 <- renderPlotly({
                 marker = list(color = "#8FBFC2",
                               line = list(color = "black",
                                           width = 1)),
-                error_y = list(color = "black",
+                error_y = list(color = ci_colour,
                                array = ~(wgt_percent_upp_2018-wgt_percent_2018)*100,
                                arrayminus = ~(wgt_percent_2018-wgt_percent_low_2018)*100)) %>%
       add_trace(x = ~response_text_dashboard, y = ~wgt_percent*100,
@@ -477,7 +484,7 @@ output$group_plot2 <- renderPlotly({
                 marker = list(color = "#1E7F84",
                               line = list(color = "black",
                                           width = 1)),
-                error_y = list(color = "black",
+                error_y = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       layout(xaxis = list(title = ""),

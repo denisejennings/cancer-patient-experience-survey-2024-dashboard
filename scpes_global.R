@@ -10,6 +10,7 @@ library(janitor)
 library(shiny)
 library(shinyjs)
 library(shinyWidgets)
+library(shinymanager)
 library(plotly)
 library(stringr)
 library(phsstyles)
@@ -44,7 +45,9 @@ data_by_area <- readRDS("/conf/bss/CPES/2024/Output/analysis_output/dashboard_ou
                                       level == "NHS board of residence" ~ paste(report_area_name, "(Board of residence)"),
                                       level == "Network of treatment" ~ paste(report_area_name, "(Network of treatment)"),
                                       level == "Network of residence" ~ paste(report_area_name, "(Network of residence)"),
-                                      T ~ report_area_name))
+                                      T ~ report_area_name),
+         question = toupper(question),
+         question_text = paste(question, question_text, sep = ": "))
 
 check_names <- data_by_area %>%
   group_by(response_text_analysis, response_text_dashboard) %>%
@@ -63,7 +66,9 @@ data_by_cancer_group <- readRDS("/conf/bss/CPES/2024/Output/analysis_output/canc
          response_text_dashboard = str_replace(response_text_dashboard,"Hospital restrictions prevented me from taking someone with me","Hospital restrictions prevented this"),
          response_text_dashboard = str_replace(response_text_dashboard,"\\(transport unavailable / rush hour etc.\\)","")) %>%
   mutate(report_area = case_when(report_area == "Scotland" ~ "All cancers",
-                                 T ~ report_area))
+                                 T ~ report_area),
+         question = toupper(question),
+         question_text = paste(question, question_text, sep = ": "))
 
 
 # Create separate all cancers group variable for use in comparative plots in dashboard
@@ -139,6 +144,10 @@ download_data_server <- function(id, data, filename) {
     }
   )
 }
+
+# Set colours
+ci_colour <- "#C73918"
+plot1_colours <- c("#3F3685", "#9F9BC2")
 
 ################################################################################
 # End of script ----------------------------------------------------------------
