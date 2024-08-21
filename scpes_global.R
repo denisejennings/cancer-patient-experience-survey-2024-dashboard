@@ -55,6 +55,13 @@ check_names <- data_by_area %>%
 # Read in data for cancer groups
 data_by_cancer_group <- readRDS("/conf/bss/CPES/2024/Output/analysis_output/cancer_group_dashboard_output_2024.rds") %>%
   clean_names() %>%
+  select(-question_text) %>%
+  rename(question_text = question_text_dashboard) %>%
+  mutate(response_text_dashboard = str_replace(response_text_dashboard,"No, social distancing measures prevented this","No (social distancing measures)"),
+         response_text_dashboard = str_replace(response_text_dashboard,"I did not need / want to bring someone with me","I did not need / want to"),
+         response_text_dashboard = str_replace(response_text_dashboard,"\\(cost, travel, anything else\\)",""),
+         response_text_dashboard = str_replace(response_text_dashboard,"Hospital restrictions prevented me from taking someone with me","Hospital restrictions prevented this"),
+         response_text_dashboard = str_replace(response_text_dashboard,"\\(transport unavailable / rush hour etc.\\)","")) %>%
   mutate(report_area = case_when(report_area == "Scotland" ~ "All cancers",
                                  T ~ report_area))
 
