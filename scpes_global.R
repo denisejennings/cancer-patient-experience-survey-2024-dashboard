@@ -47,13 +47,12 @@ data_by_area <- readRDS("dashboard_output_2024.rds") %>%
                                       level == "Network of residence" ~ paste(report_area_name, "(Network of residence)"),
                                       T ~ report_area_name),
          question = toupper(question),
-         question_text = paste(substr(question, 1,3), question_text, sep = ": "))
-
-check_names <- data_by_area %>%
-  group_by(response_text_analysis, response_text_dashboard) %>%
-  summarise(count = n())  %>%
-  mutate(diff = if_else(response_text_analysis != response_text_dashboard,1,0),
-         length = nchar(response_text_dashboard))
+         question_text = paste(substr(question, 1,3), question_text, sep = ": "),
+         response_option = case_when(question == "Q55" & response_text_dashboard == "Positive" ~ "1",
+                                     question == "Q55" & response_text_dashboard == "Neutral" ~ "2",
+                                     question == "Q55" & response_text_dashboard == "Negative" ~ "3",
+                                     T ~ response_option)) %>%
+  arrange(question,response_option)
 
 # Read in data for cancer groups
 data_by_cancer_group <- readRDS("cancer_group_dashboard_output_2024.rds") %>%
@@ -68,8 +67,13 @@ data_by_cancer_group <- readRDS("cancer_group_dashboard_output_2024.rds") %>%
   mutate(report_area = case_when(report_area == "Scotland" ~ "All",
                                  T ~ report_area),
          question = toupper(question),
-         question_text = paste(substr(question, 1,3), question_text, sep = ": "))
-
+         question_text = paste(substr(question, 1,3), question_text, sep = ": "),
+         # fix order of Q55 response options
+         response_option = case_when(question == "Q55" & response_text_dashboard == "Positive" ~ "1",
+                                     question == "Q55" & response_text_dashboard == "Neutral" ~ "2",
+                                     question == "Q55" & response_text_dashboard == "Negative" ~ "3",
+                                     T ~ response_option))%>%
+  arrange(question,response_option)
 
 # Create separate all cancers group variable for use in comparative plots in dashboard
 # First create all cancer group subset

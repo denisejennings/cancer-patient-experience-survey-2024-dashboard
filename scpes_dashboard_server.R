@@ -72,14 +72,24 @@ server <- function(input, output, session) {
              report_area == input$select_cancer_group)
   })
 
+  #Data by cancer group solely for use in the data table
+  cancer_group_data_table <- reactive({
 
+    data_by_cancer_group %>%
+      select(question, question_text, topic, report_area, response_text_dashboard, n_response, wgt_percent, wgt_percent_low, wgt_percent_upp, wgt_percent_all_cancers,
+             wgt_percent_low_all_cancers, wgt_percent_upp_all_cancers, wgt_percent_2018, wgt_percent_low_2018, wgt_percent_upp_2018, wgt_percent_2015,
+             wgt_percent_low_2015, wgt_percent_upp_2015) %>%
+      filter(topic == input$group_survey_section,
+             question_text == input$group_select_question,
+             report_area %in% c(input$select_cancer_group,"All cancers"))
+  })
 ################################################################################
 #  Create info button for confidence interval description ----------------------
 ################################################################################
 
 # Text for 'What are confidence intervals' info button
   ci_modal <- modalDialog(
-    p(tags$b("Confidence intervals: "), "The lines at the end of the bars in the charts represent 95% confidence intervals. There is always a degree of
+    p(tags$b("Confidence intervals: "), "The red lines at the end of the bars in the charts represent 95% confidence intervals. There is always a degree of
       uncertainty in survey results, caused by survey error or random variation. The confidence interval describes the range in which the
       true value of statistic is likely to be found."),
     p(tags$b("Interpretation: "), "Confidence intervals allow comparisons to be made between statistics from different years' surveys, or
@@ -93,7 +103,7 @@ server <- function(input, output, session) {
 
 # Repeat steps for data by cancer group tab
   group_ci_modal <- modalDialog(
-    p(tags$b("Confidence intervals: "), "The lines at the end of the bars in the charts represent 95% confidence intervals. There is always a degree of
+    p(tags$b("Confidence intervals: "), "The red lines at the end of the bars in the charts represent 95% confidence intervals. There is always a degree of
       uncertainty in survey results, caused by survey error or random variation. The confidence interval describes the range in which the
       true value of statistic is likely to be found."),
     p(tags$b("Interpretation: "), "Confidence intervals allow comparisons to be made between statistics from different years' surveys, or
@@ -183,12 +193,9 @@ questions <- c("Q07", "Q46", "Q48")
         # add unique to levels to ensure correct functionality
         mutate(report_area_name = factor(report_area_name, levels = unique(dropdown_items))) %>%
 
-        # add so reposse options are displayed in correct order
+        # add so reponse options are displayed in correct order
         mutate(response_text_dashboard = factor(response_text_dashboard,
-                                                levels = unique(response_text_dashboard)),
-               response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
-                                                                              levels = c("Positive", "Neutral", "Negative")),
-                                                   T ~ response_text_dashboard))
+                                                levels = unique(response_text_dashboard)))
 
       # use if else statement to produce horizontal or vertical charts depending on question response length
       if(area_data()$question %in% questions) {
@@ -244,10 +251,7 @@ output$area_plot2 <- renderPlotly({
 
   area_plot2 <- time_data() %>%
     mutate(response_text_dashboard = factor(response_text_dashboard,
-                                            levels = unique(response_text_dashboard)),
-           response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
-                                                                          levels = c("Positive", "Neutral", "Negative")),
-                                               T ~ response_text_dashboard))
+                                            levels = unique(response_text_dashboard)))
 
  if(time_data()$question %in% questions) {
 
@@ -345,12 +349,9 @@ output$cancer_group_plot <- renderPlotly({
 
   cancer_group_plot <- cancer_group_data() %>%
 
-    # ensures reponses appear in correct order
+    # ensures responses appear in correct order
     mutate(response_text_dashboard = factor(response_text_dashboard,
-                                            levels = unique(response_text_dashboard)),
-           response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
-                                                                          levels = c("Positive", "Neutral", "Negative")),
-                                               T ~ response_text_dashboard))
+                                            levels = unique(response_text_dashboard)))
 
   # use if else statement to produce horizontal or vertical charts depending on question response length
   if(cancer_group_data()$question %in% questions) {
@@ -419,15 +420,13 @@ output$cancer_group_plot <- renderPlotly({
 
 })
 
+
 # add time chart to compare current and previous years for cancer group selected
 output$cancer_group_plot2 <- renderPlotly({
 
   cancer_group_plot2 <- cancer_group_data() %>%
     mutate(response_text_dashboard = factor(response_text_dashboard,
-                                            levels = unique(response_text_dashboard)),
-           response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
-                                                                          levels = c("Positive", "Neutral", "Negative")),
-                                               T ~ response_text_dashboard))
+                                            levels = unique(response_text_dashboard)))
 
   if(cancer_group_data()$question %in% questions) {
 
@@ -531,23 +530,22 @@ output$cancer_group_plot2 <- renderPlotly({
       # select required variables for table
       select(- c(question, question_text, topic, level)) %>%
 
-      # mutate for apporirate decimal places (include round() to avoid the rounding error in dashboard presentation)
+      # mutate for appropriate decimal places (include round() to avoid the rounding error in dashboard presentation)
       mutate(across(starts_with("wgt_percent"), ~ round(.x *100, 2))) %>%
       mutate(across(starts_with("wgt_percent") & !contains(c("low", "upp")), ~ round(.x))) %>%
-
-      # rename varibales for table presentation
-      rename("Location" = report_area_name,
+      mutate("Confidence Interval 2024" = if_else(!is.na(wgt_percent),paste0("(", wgt_percent_low," - ",wgt_percent_upp,")"),""),
+             "Confidence Interval 2018" = if_else(!is.na(wgt_percent_2018),paste0("(", wgt_percent_low_2018," - ",wgt_percent_upp_2018,")"),""),
+             "Confidence Interval 2015" = if_else(!is.na(wgt_percent_2015),paste0("(", wgt_percent_low_2015," - ",wgt_percent_upp_2015,")"),"")) %>%
+      #rename variables for table presentation
+      select("Location" = report_area_name,
              "Response option" = response_text_dashboard,
              "Number of responses 2024" = n_response,
              "Response % 2024" = wgt_percent,
-             "Lower CI 2024"   = wgt_percent_low,
-             "Upper CI 2024"   = wgt_percent_upp,
+             "Confidence Interval 2024",
              "Response % 2018" = wgt_percent_2018,
-             "Lower CI 2018"   = wgt_percent_low_2018,
-             "Upper CI 2018"   = wgt_percent_upp_2018,
+             "Confidence Interval 2018",
              "Response % 2015" = wgt_percent_2015,
-             "Lower CI 2015"   = wgt_percent_low_2015,
-             "Upper CI 2015"   = wgt_percent_upp_2015)
+             "Confidence Interval 2015")
 
     # add caption and format table
     datatable(table,
@@ -563,27 +561,25 @@ output$cancer_group_plot2 <- renderPlotly({
 # Repeat steps for data by cancer group table
   output$cancer_group_table <- renderDataTable({
 
-    table <- cancer_group_data() %>%
-      select(report_area, response_text_dashboard, n_response, wgt_percent, wgt_percent_low, wgt_percent_upp,
-             wgt_percent_all_cancers, wgt_percent_low_all_cancers, wgt_percent_upp_all_cancers, wgt_percent_2018,
-             wgt_percent_low_2018, wgt_percent_upp_2018, wgt_percent_2015, wgt_percent_low_2015, wgt_percent_upp_2015) %>%
-      mutate(across(starts_with("wgt_percent"), ~ round(.x *100, 2))) %>%
-      mutate(across(starts_with("wgt_percent") & !contains(c("low", "upp")), ~ round(.x))) %>%
-      rename("Cancer group" = report_area,
-             "Response option" = response_text_dashboard,
-             "Number of responses 2024" = n_response,
-             "Response % 2024" = wgt_percent,
-             "Lower CI 2024" = wgt_percent_low,
-             "Upper CI 2024" = wgt_percent_upp,
-             "Response % All cancer groups 2024" = wgt_percent_all_cancers,
-             "Lower CI All cancer groups 2024" = wgt_percent_low_all_cancers,
-             "Upper CI All cancer groups 2024" = wgt_percent_upp_all_cancers,
-             "Response % 2018" = wgt_percent_2018,
-             "Lower CI 2018" = wgt_percent_low_2018,
-             "Upper CI 2018" = wgt_percent_upp_2018,
-             "Response % 2015" = wgt_percent_2015,
-             "Lower CI 2015" = wgt_percent_low_2015,
-             "Upper CI 2015" = wgt_percent_upp_2015)
+      table <- cancer_group_data_table() %>%
+        select(report_area, response_text_dashboard, n_response, wgt_percent, wgt_percent_low, wgt_percent_upp,
+               wgt_percent_2018,wgt_percent_low_2018, wgt_percent_upp_2018, wgt_percent_2015, wgt_percent_low_2015, wgt_percent_upp_2015) %>%
+        # mutate for appropriate decimal places (include round() to avoid the rounding error in dashboard presentation)
+        mutate(across(starts_with("wgt_percent"), ~ round(.x *100, 2))) %>%
+        mutate(across(starts_with("wgt_percent") & !contains(c("low", "upp")), ~ round(.x))) %>%
+        mutate("Confidence Interval 2024" = if_else(!is.na(wgt_percent),paste0("(", wgt_percent_low," - ",wgt_percent_upp,")"),""),
+               "Confidence Interval 2018" = if_else(!is.na(wgt_percent_2018),paste0("(", wgt_percent_low_2018," - ",wgt_percent_upp_2018,")"),""),
+               "Confidence Interval 2015" = if_else(!is.na(wgt_percent_2015),paste0("(", wgt_percent_low_2015," - ",wgt_percent_upp_2015,")"),"")) %>%
+        #rename variables for table presentation
+        select("Cancer group" = report_area,
+               "Response option" = response_text_dashboard,
+               "Number of responses 2024" = n_response,
+               "Response % 2024" = wgt_percent,
+               "Confidence Interval 2024",
+               "Response % 2018" = wgt_percent_2018,
+               "Confidence Interval 2018",
+               "Response % 2015" = wgt_percent_2015,
+               "Confidence Interval 2015")
 
     datatable(table,
               caption = paste0("Responses for the", " ", input$select_cancer_group, " ", "cancer group in 2024 compared to all responses 2024 and", " ",
@@ -593,6 +589,7 @@ output$cancer_group_plot2 <- renderPlotly({
               rownames = FALSE,
               options = list(scrollX = TRUE,
                              dom = 't'))
+
   })
 
 
@@ -646,7 +643,7 @@ output$cancer_group_plot2 <- renderPlotly({
 
   })
 
-# Add dowload data functionality using function (found in global.R)
+# Add download data functionality using function (found in global.R)
   download_data_server(id = "download_area_data", data = area_download, filename = "area")
   download_data_server(id = "download_cancer_group_data", data = cancer_group_download, filename = "cancer_group")
 
