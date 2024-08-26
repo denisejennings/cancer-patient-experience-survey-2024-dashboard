@@ -254,7 +254,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
              ), # tabPanel
 )# navbarPage
 )# tagList
- #) # secureApp
+# )  #secureApp
 ) # fluidPage
 
 ################################################################################
