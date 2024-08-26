@@ -38,7 +38,7 @@ server <- function(input, output, session) {
   area_data <- reactive({
 
     data_by_area %>%
-      select(question, question_text, topic, level, report_area_name, response_text_dashboard,
+      select(question, question_text, topic, level, report_area_name, response_text_dashboard, n_response,
              wgt_percent, wgt_percent_low, wgt_percent_upp, wgt_percent_2018, wgt_percent_low_2018, wgt_percent_upp_2018, wgt_percent_2015,
              wgt_percent_low_2015, wgt_percent_upp_2015) %>%
       filter(topic == input$survey_section,
@@ -51,7 +51,7 @@ server <- function(input, output, session) {
   time_data <- reactive({
 
     data_by_area %>%
-      select(question, question_text, topic, level, report_area_name, response_text_dashboard,
+      select(question, question_text, topic, level, report_area_name, response_text_dashboard, n_response,
              wgt_percent, wgt_percent_low, wgt_percent_upp, wgt_percent_2018, wgt_percent_low_2018, wgt_percent_upp_2018, wgt_percent_2015,
              wgt_percent_low_2015, wgt_percent_upp_2015) %>%
       filter(topic == input$survey_section,
@@ -64,7 +64,7 @@ server <- function(input, output, session) {
   cancer_group_data <- reactive({
 
     data_by_cancer_group %>%
-      select(question, question_text, topic, report_area, response_text_dashboard, wgt_percent, wgt_percent_low, wgt_percent_upp, wgt_percent_all_cancers,
+      select(question, question_text, topic, report_area, response_text_dashboard, n_response, wgt_percent, wgt_percent_low, wgt_percent_upp, wgt_percent_all_cancers,
              wgt_percent_low_all_cancers, wgt_percent_upp_all_cancers, wgt_percent_2018, wgt_percent_low_2018, wgt_percent_upp_2018, wgt_percent_2015,
              wgt_percent_low_2015, wgt_percent_upp_2015) %>%
       filter(topic == input$group_survey_section,
@@ -79,7 +79,7 @@ server <- function(input, output, session) {
 
 # Text for 'What are confidence intervals' info button
   ci_modal <- modalDialog(
-    p(tags$b("Confidence intervals: "), "The vertical lines in the charts represent 95% confidence intervals. There is always a degree of
+    p(tags$b("Confidence intervals: "), "The lines at the end of the bars in the charts represent 95% confidence intervals. There is always a degree of
       uncertainty in survey results, caused by survey error or random variation. The confidence interval describes the range in which the
       true value of statistic is likely to be found."),
     p(tags$b("Interpretation: "), "Confidence intervals allow comparisons to be made between statistics from different years' surveys, or
@@ -93,7 +93,7 @@ server <- function(input, output, session) {
 
 # Repeat steps for data by cancer group tab
   group_ci_modal <- modalDialog(
-    p(tags$b("Confidence intervals: "), "The vertical lines in the charts represent 95% confidence intervals. There is always a degree of
+    p(tags$b("Confidence intervals: "), "The lines at the end of the bars in the charts represent 95% confidence intervals. There is always a degree of
       uncertainty in survey results, caused by survey error or random variation. The confidence interval describes the range in which the
       true value of statistic is likely to be found."),
     p(tags$b("Interpretation: "), "Confidence intervals allow comparisons to be made between statistics from different years' surveys, or
@@ -114,22 +114,22 @@ server <- function(input, output, session) {
   output$area <- renderUI({
 
     area_chart_title <- paste0("2024 Survey Results for", " ", input$select_report, " ", "against", " ", input$select_comparator)
-    year_chart_title <- paste0("Survey Results for", " ", input$select_comparator, " ", "over time, where available")
+    year_chart_title <- paste0("Survey Results for", " ", input$select_comparator, " ", "over time where available")
 
     tagList(
       br(),
-      h3(tags$b(paste0(area_chart_title)),
+      h3(tags$b(paste0(area_chart_title))),
       br(),
       fluidRow(column(9, h4(tags$b(paste0(input$select_question)))),
                column(3, div(actionButton("ci_info","What are confidence intervals?",
                                           icon = icon('question-circle')), style = "float: right"))),
-      withSpinner(plotlyOutput("plot")),
+      withSpinner(plotlyOutput("area_plot")),
       br(),
       h3(tags$b(paste0(year_chart_title))),
       fluidRow(column(12, tags$b("Note:"), "Where responses from previous years do not appear, the question is either not comparable
          between years, or is a new question for 2024"),
-               column(9, h4(tags$b(input$select_question))))),
-      withSpinner(plotlyOutput("plot2")),
+               column(9, h4(tags$b(input$select_question)))),
+      withSpinner(plotlyOutput("area_plot2")),
       column(3, download_data_UI(id = "download_area_data")),
       column(12, dataTableOutput("area_table")), br(), br()
     ) #tagList
@@ -146,18 +146,18 @@ server <- function(input, output, session) {
 
     tagList(
       br(),
-      h3(tags$b(paste0(group_chart_title)),
+      h3(tags$b(paste0(group_chart_title))),
       br(),
       fluidRow(column(9, h4(tags$b(paste0(input$group_select_question)))),
                column(3, div(actionButton("group_ci_info","What are confidence intervals?",
                                           icon = icon('question-circle')), style = "float: right"))),
-      withSpinner(plotlyOutput("group_plot")),
+      withSpinner(plotlyOutput("cancer_group_plot")),
       br(),
       h3(tags$b(paste0(year_chart_title))),
       fluidRow(column(12, tags$b("Note:"), "Where responses from previous years do not appear, the question is either not comparable
          between years, or is a new question for 2024"),
-               column(9, h4(tags$b(input$group_select_question))))),
-      withSpinner(plotlyOutput("group_plot2")),
+               column(9, h4(tags$b(input$group_select_question)))),
+      withSpinner(plotlyOutput("cancer_group_plot2")),
       column(3, download_data_UI(id = "download_cancer_group_data")),
       column(12, dataTableOutput("cancer_group_table")), br(), br()
     ) #tagList
@@ -171,13 +171,13 @@ server <- function(input, output, session) {
 questions <- c("Q07", "Q46", "Q48")
 
 # Survey results for comparing report areas
-  output$plot <- renderPlotly({
+  output$area_plot <- renderPlotly({
 
   # set this for filtering so chart legend appears in correct order
   dropdown_items <- c(input$select_report,
                         input$select_comparator)
 
-  plot <- area_data() %>%
+  area_plot <- area_data() %>%
         filter(report_area_name %in% dropdown_items) %>%
 
         # add unique to levels to ensure correct functionality
@@ -193,7 +193,7 @@ questions <- c("Q07", "Q46", "Q48")
       # use if else statement to produce horizontal or vertical charts depending on question response length
       if(area_data()$question %in% questions) {
 
-        plot %>%
+        area_plot %>%
         plot_ly(x = ~wgt_percent*100, y = ~response_text_dashboard,
                 color = ~report_area_name,
                 colors = plot1_colours,
@@ -204,18 +204,20 @@ questions <- c("Q07", "Q46", "Q48")
                 error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
-          layout(yaxis = list(title = ""),
+          layout(yaxis = list(title = "",
+                              autorange = "reversed"),
                  xaxis = list(ticksuffix = "%",
                               title = "",
                               range = list(0, 100)),
                  bargroupgap = 0.15,
-                 legend = list(orientation = "h", x=0, y=1.2))
-                 #margin = list(l = 80, t=5))
-    }
+                 legend = list(orientation = "h", x=0, y=1.2),
+                 margin = list(pad = 10))
 
+
+}
       else {
 
-       plot %>%
+       area_plot %>%
         plot_ly(x = ~response_text_dashboard, y = ~wgt_percent*100,
                 color = ~report_area_name,
                 colors = plot1_colours,
@@ -230,16 +232,17 @@ questions <- c("Q07", "Q46", "Q48")
                               title = "",
                               range = list(0, 100)),
                  bargroupgap = 0.15,
-                 legend = list(orientation = "h", x=0, y=1.2))
-                 #margin = list(l = 80, r=200))
+                 legend = list(orientation = "h", x=0, y=1.2),
+                 margin = list(pad = 10))
+
     }
   }
   )  #plotly end
 
 # add time chart to compare current and previous years for area selected in step 4
-output$plot2 <- renderPlotly({
+output$area_plot2 <- renderPlotly({
 
-  plot2 <- time_data() %>%
+  area_plot2 <- time_data() %>%
     mutate(response_text_dashboard = factor(response_text_dashboard,
                                             levels = unique(response_text_dashboard)),
            response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
@@ -248,8 +251,8 @@ output$plot2 <- renderPlotly({
 
  if(time_data()$question %in% questions) {
 
-    plot2 %>%
-      plot_ly(x = ~wgt_percent_2015*100, y = ~response_text_dashboard,
+    area_plot2 %>%
+      plot_ly(x = ~wgt_percent*100, y = ~response_text_dashboard,
               type = "bar",
               orientation = "h",
               name = 2015,
@@ -257,8 +260,8 @@ output$plot2 <- renderPlotly({
                             line = list(color = "black",
                                         width = 1)),
               error_x = list(color = ci_colour,
-                             array = ~(wgt_percent_upp_2015-wgt_percent_2015)*100,
-                             arrayminus = ~(wgt_percent_2015-wgt_percent_low_2015)*100)) %>%
+                             array = ~(wgt_percent_upp-wgt_percent)*100,
+                             arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       add_trace(x = ~wgt_percent_2018*100, y = ~response_text_dashboard,
                 type = "bar",
                 orientation = "h",
@@ -279,17 +282,22 @@ output$plot2 <- renderPlotly({
                 error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
-      layout(yaxis = list(title = ""),
+      layout(yaxis = list(ticksuffix = "  ",
+                          title = "",
+                          showline = T,
+                          autorange = "reversed"),
              xaxis = list(ticksuffix = "%",
                           title = "",
-                          range = list(0, 100)),
+                          range = list(0, 100),
+                          showgrid = T),
              bargroupgap = 0.25,
              legend = list(orientation = "h", x = 0, y = 1.2))
+
 
   }
 
   else{
-    plot2 %>%
+    area_plot2 %>%
       plot_ly(x = ~response_text_dashboard, y = ~wgt_percent_2015*100,
               type = "bar",
               name = 2015,
@@ -322,7 +330,8 @@ output$plot2 <- renderPlotly({
                           title = "",
                           range = list(0, 100)),
              bargroupgap = 0.25,
-             legend = list(orientation = "h", x = 0, y = 1.2))
+             legend = list(orientation = "h", x = 0, y = 1.2),
+             margin = list(pad = 10))
   }
 
   }
@@ -331,10 +340,10 @@ output$plot2 <- renderPlotly({
 
 
 # Survey results for comparing individual cancer groups with All cancers group
-output$group_plot <- renderPlotly({
+output$cancer_group_plot <- renderPlotly({
 
 
-  group_plot <- cancer_group_data() %>%
+  cancer_group_plot <- cancer_group_data() %>%
 
     # ensures reponses appear in correct order
     mutate(response_text_dashboard = factor(response_text_dashboard,
@@ -346,7 +355,7 @@ output$group_plot <- renderPlotly({
   # use if else statement to produce horizontal or vertical charts depending on question response length
   if(cancer_group_data()$question %in% questions) {
 
-    group_plot %>%
+    cancer_group_plot %>%
       plot_ly(x = ~wgt_percent*100, y = ~response_text_dashboard,
               type = "bar",
               orientation = "h",
@@ -367,17 +376,19 @@ output$group_plot <- renderPlotly({
                 error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp_all_cancers-wgt_percent_all_cancers)*100,
                                arrayminus = ~(wgt_percent_all_cancers-wgt_percent_low_all_cancers)*100)) %>%
-      layout(yaxis = list(title = ""),
+      layout(yaxis = list(title = "",
+                          autorange = "reversed"),
              xaxis = list(ticksuffix = "%",
                           title = "",
                           range = list(0, 100)),
              bargroupgap = 0.15,
-             legend = list(orientation = "h", x = 0, y = 1.2))
+             legend = list(orientation = "h", x = 0, y = 1.2),
+             margin = list(pad = 10))
   }
 
   else{
 
-    group_plot %>%
+    cancer_group_plot %>%
       plot_ly(x = ~response_text_dashboard, y = ~wgt_percent*100,
               type = "bar",
               name = input$select_cancer_group,
@@ -401,16 +412,17 @@ output$group_plot <- renderPlotly({
                           title = "",
                           range = list(0, 100)),
              bargroupgap = 0.15,
-             legend = list(orientation = "h", x = 0, y = 1.2))
+             legend = list(orientation = "h", x = 0, y = 1.2),
+             margin = list(pad = 10))
 
   }
 
 })
 
 # add time chart to compare current and previous years for cancer group selected
-output$group_plot2 <- renderPlotly({
+output$cancer_group_plot2 <- renderPlotly({
 
-  group_plot2 <- cancer_group_data() %>%
+  cancer_group_plot2 <- cancer_group_data() %>%
     mutate(response_text_dashboard = factor(response_text_dashboard,
                                             levels = unique(response_text_dashboard)),
            response_text_dashboard = case_when(question == "Q55" ~ factor(response_text_dashboard,
@@ -419,7 +431,7 @@ output$group_plot2 <- renderPlotly({
 
   if(cancer_group_data()$question %in% questions) {
 
-    group_plot2 %>%
+    cancer_group_plot2 %>%
       plot_ly(x = ~wgt_percent_2015*100, y = ~response_text_dashboard,
               type = "bar",
               orientation = "h",
@@ -450,16 +462,20 @@ output$group_plot2 <- renderPlotly({
                 error_x = list(color = ci_colour,
                                array = ~(wgt_percent_upp-wgt_percent)*100,
                                arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
-      layout(yaxis = list(title = ""),
+      layout(yaxis = list(ticksuffix = "  ",
+                          title = "",
+                          showline = T,
+                          autorange = "reversed"),
              xaxis = list(ticksuffix = "%",
                           title = "",
-                          range = list(0, 100)),
+                          range = list(0, 100),
+                          showgrid = T),
              bargroupgap = 0.25,
              legend = list(orientation = "h", x = 0, y = 1.2))
   }
 
   else{
-    group_plot2 %>%
+    cancer_group_plot2 %>%
       plot_ly(x = ~response_text_dashboard, y = ~wgt_percent_2015*100,
               type = "bar",
               name = 2015,
@@ -492,7 +508,8 @@ output$group_plot2 <- renderPlotly({
                           title = "",
                           range = list(0, 100)),
              bargroupgap = 0.25,
-             legend = list(orientation = "h", x = 0, y = 1.2))
+             legend = list(orientation = "h", x = 0, y = 1.2),
+             margin = list(pad = 10))
   }
 
 }
@@ -521,6 +538,7 @@ output$group_plot2 <- renderPlotly({
       # rename varibales for table presentation
       rename("Location" = report_area_name,
              "Response option" = response_text_dashboard,
+             "Number of responses 2024" = n_response,
              "Response % 2024" = wgt_percent,
              "Lower CI 2024"   = wgt_percent_low,
              "Upper CI 2024"   = wgt_percent_upp,
@@ -546,19 +564,20 @@ output$group_plot2 <- renderPlotly({
   output$cancer_group_table <- renderDataTable({
 
     table <- cancer_group_data() %>%
-      select(report_area, response_text_dashboard, wgt_percent, wgt_percent_low, wgt_percent_upp,
+      select(report_area, response_text_dashboard, n_response, wgt_percent, wgt_percent_low, wgt_percent_upp,
              wgt_percent_all_cancers, wgt_percent_low_all_cancers, wgt_percent_upp_all_cancers, wgt_percent_2018,
              wgt_percent_low_2018, wgt_percent_upp_2018, wgt_percent_2015, wgt_percent_low_2015, wgt_percent_upp_2015) %>%
       mutate(across(starts_with("wgt_percent"), ~ round(.x *100, 2))) %>%
       mutate(across(starts_with("wgt_percent") & !contains(c("low", "upp")), ~ round(.x))) %>%
       rename("Cancer group" = report_area,
              "Response option" = response_text_dashboard,
+             "Number of responses 2024" = n_response,
              "Response % 2024" = wgt_percent,
              "Lower CI 2024" = wgt_percent_low,
              "Upper CI 2024" = wgt_percent_upp,
-             "Response % all cancer groups" = wgt_percent_all_cancers,
-             "Lower CI all cancer groups" = wgt_percent_low_all_cancers,
-             "Upper CI all cancer groups" = wgt_percent_upp_all_cancers,
+             "Response % All cancer groups 2024" = wgt_percent_all_cancers,
+             "Lower CI All cancer groups 2024" = wgt_percent_low_all_cancers,
+             "Upper CI All cancer groups 2024" = wgt_percent_upp_all_cancers,
              "Response % 2018" = wgt_percent_2018,
              "Lower CI 2018" = wgt_percent_low_2018,
              "Upper CI 2018" = wgt_percent_upp_2018,
@@ -590,6 +609,7 @@ output$group_plot2 <- renderPlotly({
       mutate(across(starts_with("wgt_percent"), ~ (.x *100))) %>%
       rename("Location" = report_area_name,
              "Response" = response_text_dashboard,
+             "Number of responses 2024" = n_response,
              "Response % 2024" = wgt_percent,
              "Lower CI 2024" = wgt_percent_low,
              "Upper CI 2024" = wgt_percent_upp,
@@ -609,6 +629,7 @@ output$group_plot2 <- renderPlotly({
       mutate(across(starts_with("wgt_percent"), ~ (.x *100))) %>%
       rename("Cancer group" = report_area,
              "Response" = response_text_dashboard,
+             "Number of responses 2024" = n_response,
              "Response % 2024" = wgt_percent,
              "Lower CI 2024" = wgt_percent_low,
              "Upper CI 2024" = wgt_percent_upp,

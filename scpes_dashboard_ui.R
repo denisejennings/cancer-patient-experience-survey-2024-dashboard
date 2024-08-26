@@ -101,8 +101,8 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                  h5(tags$b("Per cent positive style questions")),
                                  p("Responses to these questions have been categorised as positive, neutral or negative.
                                    For further information about how responses were categorised, please see the ",
-                                   tags$a(href="",
-                                          "Analysis and Reporting” chapter of the Technical Report.", target="_blank")), br(),
+                                   tags$a(href="https://www.gov.scot/isbn/9781836016793",
+                                          "Analysis and Reporting chapter of the Technical Report.", target="_blank")), br(),
 
                                  h5(tags$b("Information questions")),
                                  p("Responses to some questions cannot be put on a positive/negative scale. For these questions the percentage
@@ -112,7 +112,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                  h5(tags$b("Weighting")),
                                  p("Results at national, network and NHS Board level have been weighted. Results at Cancer Centre level have not
                                    been weighted. Full details on the weighting methodology applied are provided in  ",
-                                   tags$a(href="",
+                                   tags$a(href="https://www.gov.scot/isbn/9781836016793",
                                           "Annex D of the Technical Report.", target="_blank")), br(),
 
                                  h5(tags$b("Comparing results")),
@@ -122,7 +122,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                  p("Confidence intervals allow comparisons to be made between statistics from different years' surveys or relating to
                                    different areas. Where confidence intervals overlap, observed differences may be due to survey error or random variation.
                                    Where confidence intervals do not overlap, the observed difference is said to be significant. Further details are available in ",
-                                   tags$a(href = "",
+                                   tags$a(href = "https://www.gov.scot/isbn/9781836016793",
                                           "Annex E of the Technical Report.", target = "_blank")), br(),
 
                                  h5(tags$b("Variation in results")),
