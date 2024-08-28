@@ -30,6 +30,10 @@ data_by_area <- readRDS("dashboard_output_2024.rds") %>%
          response_text_dashboard = str_replace(response_text_dashboard,"\\(cost, travel, anything else\\)",""),
          response_text_dashboard = str_replace(response_text_dashboard,"Hospital restrictions prevented me from taking someone with me","Hospital restrictions prevented this"),
          response_text_dashboard = str_replace(response_text_dashboard,"Timing of appointment with respect to travel \\(transport unavailable / rush hour etc.\\)","Timing of appointment")) %>%
+  mutate(ci_2024 = if_else(!is.na(wgt_percent),paste0("(", round(wgt_percent_low*100, 2)," - ",round(wgt_percent_upp*100, 2),")"),""),
+         ci_2018 = if_else(!is.na(wgt_percent_2018),paste0("(", round(wgt_percent_low_2018*100, 2)," - ",round(wgt_percent_upp_2018*100, 2),")"),""),
+         ci_2015 = if_else(!is.na(wgt_percent_2015),paste0("(", round(wgt_percent_low_2015*100, 2)," - ",round(wgt_percent_upp_2015*100, 2),")"),"")) %>%
+
 
   # order areas alphabetically (by level)
   mutate(report_area_name = factor(report_area_name, levels = c("Aberdeen Royal Infirmary", "Beatson West of Scotland Cancer Centre",
@@ -37,8 +41,8 @@ data_by_area <- readRDS("dashboard_output_2024.rds") %>%
                                                                 "NHS Dumfries & Galloway", "NHS Fife", "NHS Forth Valley", "NHS Golden Jubilee", "NHS Grampian",
                                                                 "NHS Greater Glasgow & Clyde", "NHS Highland", "NHS Lanarkshire", "NHS Lothian",
                                                                 "NHS Orkney, Shetland & Western Isles", "NHS Tayside", "Ninewells Hospital", "Raigmore Hospital",
-                                                                "North of Scotland (NOSCAN)", "South of Scotland (SCAN)",
-                                                                "West of Scotland (WOSCAN)", "Scotland"))) %>%
+                                                                "North Cancer Alliance (NCA)", "South East Cancer Network (SCAN)",
+                                                                "West of Scotland Cancer Network (WoSCAN)", "Scotland"))) %>%
   arrange(report_area_name) %>%
   # add treatment or residence identifier
   mutate(report_area_name = case_when(level == "NHS board of treatment" ~ paste(report_area_name, "(Board of treatment)"),
@@ -64,6 +68,9 @@ data_by_cancer_group <- readRDS("cancer_group_dashboard_output_2024.rds") %>%
          response_text_dashboard = str_replace(response_text_dashboard,"\\(cost, travel, anything else\\)",""),
          response_text_dashboard = str_replace(response_text_dashboard,"Hospital restrictions prevented me from taking someone with me","Hospital restrictions prevented this"),
          response_text_dashboard = str_replace(response_text_dashboard,"Timing of appointment with respect to travel \\(transport unavailable / rush hour etc.\\)","Timing of appointment")) %>%
+  mutate(ci_2024 = if_else(!is.na(wgt_percent),paste0("(", round(wgt_percent_low*100, 2)," - ",round(wgt_percent_upp*100, 2),")"),""),
+         ci_2018 = if_else(!is.na(wgt_percent_2018),paste0("(", round(wgt_percent_low_2018*100, 2)," - ",round(wgt_percent_upp_2018*100, 2),")"),""),
+         ci_2015 = if_else(!is.na(wgt_percent_2015),paste0("(", round(wgt_percent_low_2015*100, 2)," - ",round(wgt_percent_upp_2015*100, 2),")"),"")) %>%
   mutate(report_area = case_when(report_area == "Scotland" ~ "All",
                                  T ~ report_area),
          question = toupper(question),
@@ -82,7 +89,9 @@ all_cancer_groups <- data_by_cancer_group %>%
   select(question, response_text_dashboard, response_option, wgt_percent, wgt_percent_low, wgt_percent_upp) %>%
   rename(wgt_percent_all_cancers = "wgt_percent",
          wgt_percent_upp_all_cancers = "wgt_percent_upp",
-         wgt_percent_low_all_cancers = "wgt_percent_low")
+         wgt_percent_low_all_cancers = "wgt_percent_low") %>%
+  mutate(ci_all_cancers = if_else(!is.na(wgt_percent_all_cancers),paste0("(", round(wgt_percent_low_all_cancers*100, 2)," - ",
+                                                                         round(wgt_percent_upp_all_cancers*100, 2),")"),""))
 
 # Combine with full dataset
 data_by_cancer_group <- data_by_cancer_group %>%
@@ -104,10 +113,10 @@ survey_section_list <- c("Getting diagnosed", "Finding out you had cancer", "Dec
 # List of levels for dropdowns
 level_list <- list(
   "Scotland" = c("Scotland"),
-  "Network of residence" = c("North of Scotland (NOSCAN) (Network of residence)", "South of Scotland (SCAN) (Network of residence)",
-                             "West of Scotland (WOSCAN) (Network of residence)"),
-  "Network of treatment" = c("North of Scotland (NOSCAN) (Network of treatment)", "South of Scotland (SCAN) (Network of treatment)",
-                             "West of Scotland (WOSCAN) (Network of treatment)"),
+  "Network of residence" = c("North Cancer Alliance (NCA) (Network of residence)", "South East Cancer Network (SCAN) (Network of residence)",
+                             "West of Scotland Cancer Network (WoSCAN) (Network of residence)"),
+  "Network of treatment" = c("North Cancer Alliance (NCA) (Network of treatment)", "South East Cancer Network (SCAN) (Network of treatment)",
+                             "West of Scotland Cancer Network (WoSCAN) (Network of treatment)"),
   "NHS board of residence" = c("NHS Ayrshire & Arran (Board of residence)", "NHS Borders (Board of residence)", "NHS Dumfries & Galloway (Board of residence)",
                                "NHS Fife (Board of residence)", "NHS Forth Valley (Board of residence)", "NHS Grampian (Board of residence)",
                                "NHS Greater Glasgow & Clyde (Board of residence)", "NHS Highland (Board of residence)", "NHS Lanarkshire (Board of residence)",
@@ -115,7 +124,7 @@ level_list <- list(
   "NHS board of treatment" = c("NHS Ayrshire & Arran (Board of treatment)", "NHS Borders (Board of treatment)", "NHS Dumfries & Galloway (Board of treatment)",
                                "NHS Fife (Board of treatment)", "NHS Forth Valley (Board of treatment)", "NHS Golden Jubilee (Board of treatment)", "NHS Grampian (Board of treatment)",
                                "NHS Greater Glasgow & Clyde (Board of treatment)", "NHS Highland (Board of treatment)", "NHS Lanarkshire (Board of treatment)",
-                               "NHS Lothian (Board of treatment)", "NHS Orkney, Shetland & Western Isles (Board of treatment)", "NHS Tayside (Board of treatment)"),
+                               "NHS Lothian (Board of treatment)", "NHS Orkney", "NHS Tayside (Board of treatment)"),
   "Cancer centre" = c("Aberdeen Royal Infirmary", "Beatson West of Scotland Cancer Centre", "Edinburgh Cancer Centre", "Ninewells Hospital", "Raigmore Hospital"))
 
 

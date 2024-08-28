@@ -59,7 +59,8 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                                 "Scottish Government website (external website).", target = "_blank")), br(),
 
                                h5(tags$b("General enquiries")),
-                               p("If you have an enquiry relating to this publication, please email patientexperience@gov.scot.")
+                               p("If you have an enquiry relating to this publication, please email ", tags$a(href="mailto:patientexperience@gov.scot",
+                                                                                                              "patientexperience@gov.scot.", target = "_blank"))
                                     ) # tagList
                                   ), # conditionalPanel
 
@@ -71,16 +72,16 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                          p("This interactive dashboard presents the results of the 2024 Scottish Cancer Patient Experience Survey.
                                            The dashboard has three tabs across the top which can be selected."),
                                  p(tags$b("Home: "), "includes sub-sections on the left hand side which provide an introduction
-                                           to the SCPES publication, accessibility information, and suggested resources to find out more."),
+                                           to the SCPES publication, accessibility information, and suggested resources to find out more"),
                                  p(tags$b("Results by area: "), "view the results by Cancer Centre, NHS Board, and Regional Cancer Network,
-                                           as well as at Scotland level."),
-                                 p(tags$b("Results by cancer group: "), "view the results by cancer group."), br(),
+                                           as well as at Scotland level"),
+                                 p(tags$b("Results by cancer group: "), "view the results by cancer group"), br(),
                                  h5(tags$b("Interacting with the dashboard")),
                                  p("On each tab there are drop-down menus which allow the user to to select a question from the survey and update
                                    the charts and data tables for their specific NHS Board, hospital, or subgroup of interest. "), br(),
 
                                h5(tags$b("Downloading data")),
-                               p("There is the option to download data as a csv file by clicking the 'Download data' button which can be
+                               p("There is the option to download data as a .csv file by clicking the 'Download data' button which can be
                                          found above the table on both results tabs."),
                                p("To download an image of a chart, click the camera icon in the top-right
                                          corner of any chart in the dashboard and a .png image file will automatically download.")
@@ -119,6 +120,11 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                  p("There is always a degree of uncertainty in survey results, caused by survey error or random variation.
                                    The results are presented with 95% confidence intervals which describes the range in which the true value of
                                    statistic is likely to be found."),
+                                 p("A confidence interval gives an indication of the degree of uncertainty of an estimate and helps to describe
+                                   how precise a sample estimate is. Confidence intervals use thestandard error to derive a range in which we think
+                                   the true value is likely to lie. It specifies a range of values likely to contain the unknown population value. A
+                                   95% confidence interval means that, over many repeats of a survey under the same conditions, one would expect that
+                                   the confidence interval would contain the true population value 95 times out of 100."),
                                  p("Confidence intervals allow comparisons to be made between statistics from different years' surveys or relating to
                                    different areas. Where confidence intervals overlap, observed differences may be due to survey error or random variation.
                                    Where confidence intervals do not overlap, the observed difference is said to be significant. Further details are available in ",
