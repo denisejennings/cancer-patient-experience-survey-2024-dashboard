@@ -40,9 +40,9 @@ data_by_area <- readRDS("dashboard_output_2024.rds") %>%
                                                                 "Edinburgh Cancer Centre", "NHS Ayrshire & Arran", "NHS Borders",
                                                                 "NHS Dumfries & Galloway", "NHS Fife", "NHS Forth Valley", "NHS Golden Jubilee", "NHS Grampian",
                                                                 "NHS Greater Glasgow & Clyde", "NHS Highland", "NHS Lanarkshire", "NHS Lothian",
-                                                                "NHS Orkney, Shetland & Western Isles", "NHS Tayside", "Ninewells Hospital", "Raigmore Hospital",
-                                                                "North Cancer Alliance (NCA)", "South East Cancer Network (SCAN)",
-                                                                "West of Scotland Cancer Network (WoSCAN)", "Scotland"))) %>%
+                                                                "NHS Orkney, NHS Shetland & NHS Western Isles", "NHS Tayside", "Ninewells Hospital", "Raigmore Hospital",
+                                                                "NCA – North Cancer Alliance", "SCAN – South East Cancer Network",
+                                                                "WoSCAN – West of Scotland Cancer Network", "Scotland"))) %>%
   arrange(report_area_name) %>%
   # add treatment or residence identifier
   mutate(report_area_name = case_when(level == "NHS board of treatment" ~ paste(report_area_name, "(Board of treatment)"),
@@ -56,6 +56,7 @@ data_by_area <- readRDS("dashboard_output_2024.rds") %>%
                                      question == "Q55" & response_text_dashboard == "Neutral" ~ "2",
                                      question == "Q55" & response_text_dashboard == "Negative" ~ "3",
                                      T ~ response_option)) %>%
+  mutate(question_text = if_else(str_detect(question_type,"tick") == T, paste0(question_text," (tick all that apply)"),question_text)) %>%
   arrange(question,response_option)
 
 # Read in data for cancer groups
@@ -80,6 +81,7 @@ data_by_cancer_group <- readRDS("cancer_group_dashboard_output_2024.rds") %>%
                                      question == "Q55" & response_text_dashboard == "Neutral" ~ "2",
                                      question == "Q55" & response_text_dashboard == "Negative" ~ "3",
                                      T ~ response_option))%>%
+  mutate(question_text = if_else(str_detect(question_type,"tick") == T, paste0(question_text," (tick all that apply)"),question_text)) %>%
   arrange(question,response_option)
 
 # Create separate all cancers group variable for use in comparative plots in dashboard
@@ -113,14 +115,14 @@ survey_section_list <- c("Getting diagnosed", "Finding out you had cancer", "Dec
 # List of levels for dropdowns
 level_list <- list(
   "Scotland" = c("Scotland"),
-  "Network of residence" = c("North Cancer Alliance (NCA) (Network of residence)", "South East Cancer Network (SCAN) (Network of residence)",
-                             "West of Scotland Cancer Network (WoSCAN) (Network of residence)"),
-  "Network of treatment" = c("North Cancer Alliance (NCA) (Network of treatment)", "South East Cancer Network (SCAN) (Network of treatment)",
-                             "West of Scotland Cancer Network (WoSCAN) (Network of treatment)"),
+  "Network of residence" = c("NCA – North Cancer Alliance (Network of residence)", "SCAN – South East Cancer Network (Network of residence)",
+                             "WoSCAN – West of Scotland Cancer Network (Network of residence)"),
+  "Network of treatment" = c("NCA – North Cancer Alliance (Network of treatment)", "SCAN – South East Cancer Network (Network of treatment)",
+                             "WoSCAN – West of Scotland Cancer Network (Network of treatment)"),
   "NHS board of residence" = c("NHS Ayrshire & Arran (Board of residence)", "NHS Borders (Board of residence)", "NHS Dumfries & Galloway (Board of residence)",
                                "NHS Fife (Board of residence)", "NHS Forth Valley (Board of residence)", "NHS Grampian (Board of residence)",
                                "NHS Greater Glasgow & Clyde (Board of residence)", "NHS Highland (Board of residence)", "NHS Lanarkshire (Board of residence)",
-                               "NHS Lothian (Board of residence)", "NHS Orkney, Shetland & Western Isles (Board of residence)", "NHS Tayside (Board of residence)"),
+                               "NHS Lothian (Board of residence)", "NHS Orkney, NHS Shetland & NHS Western Isles (Board of residence)", "NHS Tayside (Board of residence)"),
   "NHS board of treatment" = c("NHS Ayrshire & Arran (Board of treatment)", "NHS Borders (Board of treatment)", "NHS Dumfries & Galloway (Board of treatment)",
                                "NHS Fife (Board of treatment)", "NHS Forth Valley (Board of treatment)", "NHS Golden Jubilee (Board of treatment)", "NHS Grampian (Board of treatment)",
                                "NHS Greater Glasgow & Clyde (Board of treatment)", "NHS Highland (Board of treatment)", "NHS Lanarkshire (Board of treatment)",
