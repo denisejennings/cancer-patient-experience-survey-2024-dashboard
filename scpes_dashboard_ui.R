@@ -6,7 +6,7 @@
 
 
 # Create main page with tabs and required CSS settings
-ui <- #secure_app( #uncomment if needing password protection
+ui <- secure_app( #uncomment if needing password protection
   fluidPage(
 tagList( #needed for shinyjs
   useShinyjs(),  # Include shinyjs
@@ -46,7 +46,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                             #h4(tags$b(2024)),
                                             h5(tags$b(paste0("Publication date: 10th September 2024"))),
                                             p(paste0("The Scottish Cancer Patient Experience Survey (SCPES) is a national postal
-                                                     survey jointly funded by the Scottish Government and Macmillan Cancer Scotland,
+                                                     survey jointly funded by the Scottish Government and Macmillan Cancer Support,
                                                      run in partnership with Public Health Scotland.")),
                                p("The survey asks individuals about their experiences of cancer care, from thinking that something
                                  might be wrong, to the support they received after diagnosis and treatment."),
@@ -109,6 +109,9 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                  p("Responses to some questions cannot be put on a positive/negative scale. For these questions the percentage
                                    of people selecting each response for each question is shown."), br(),
 
+                                 h5(tags$b("Tick all that apply questions")),
+                                 p("For these questions, respondents could tick more than one option and so results cannot be summed."), br(),
+
                                  h4(tags$b("Methodology")),
                                  h5(tags$b("Weighting")),
                                  p("Results at national, network and NHS Board level have been weighted. Results at Cancer Centre level have not
@@ -121,7 +124,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
                                    The results are presented with 95% confidence intervals which describes the range in which the true value of
                                    statistic is likely to be found."),
                                  p("A confidence interval gives an indication of the degree of uncertainty of an estimate and helps to describe
-                                   how precise a sample estimate is. Confidence intervals use thestandard error to derive a range in which we think
+                                   how precise a sample estimate is. Confidence intervals use the standard error to derive a range in which we think
                                    the true value is likely to lie. It specifies a range of values likely to contain the unknown population value. A
                                    95% confidence interval means that, over many repeats of a survey under the same conditions, one would expect that
                                    the confidence interval would contain the true population value 95 times out of 100."),
@@ -174,8 +177,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
 
                                 h5(tags$b("Reporting any accessibility problems with this website")),
                                 p("If you wish to contact us about any accessibility issues you encounter on this
-                                 site, please email ", tags$a(href="mailto:phs.patient-exp-surveys@phs.scot", ".")), br(),
-
+                                 site, please email ", tags$a(href="mailto:phs.patient-exp-surveys@phs.scot", "phs.patient-exp-surveys@phs.scot")), br(),
                                 h5(tags$b("Enforcement procedure")),
                                 p("The Equality and Human Rights Commission (EHRC) is responsible for enforcing the
                                Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations
@@ -260,7 +262,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
              ), # tabPanel
 )# navbarPage
 )# tagList
-# )  #secureApp
+ )  #secureApp
 ) # fluidPage
 
 ################################################################################

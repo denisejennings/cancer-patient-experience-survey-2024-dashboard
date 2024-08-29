@@ -5,7 +5,7 @@
 # ------------------------------------------------------------------------------
 
 # Set password protection
-#credentials <- readRDS("admin/credentials.rds")
+credentials <- readRDS("admin/credentials.rds")
 
 
 ################################################################################
@@ -15,7 +15,7 @@
 server <- function(input, output, session) {
 
 # Shinymanager Auth
-#res_auth <- secure_server(check_credentials = check_credentials(credentials))
+res_auth <- secure_server(check_credentials = check_credentials(credentials))
 
   # Set the dropdown menu so only questions relevant to the survey section selected appear
   observeEvent(
@@ -262,72 +262,71 @@ questions <- c("Q07", "Q46", "Q48")
   )  #plotly end
 
 # add time chart to compare current and previous years for area selected in step 4
-output$area_plot2 <- renderPlotly({
+  output$area_plot2 <- renderPlotly({
 
-  tooltip_area_trend <- function(percent, ci){
+    tooltip_area_trend <- function(percent, ci){
 
-    c(paste0(time_data()$report_area_name, "<br>",
-             time_data()$response_text_dashboard, "<br>",
-             "Response %: ", format(round({{percent}}*100)), "<br>",
-             "Confidence interval %: ", format({{ci}})))
-  }
+      c(paste0(time_data()$report_area, "<br>",
+               time_data()$response_text_dashboard, "<br>",
+               "Response %: ", format(round({{percent}}*100)), "<br>",
+               "Confidence interval %: ", format({{ci}})))
+    }
 
-  area_plot2 <- time_data() %>%
-    mutate(response_text_dashboard = factor(response_text_dashboard,
-                                            levels = unique(response_text_dashboard)))
 
- if(time_data()$question %in% questions) {
+    area_plot2 <- time_data() %>%
+      mutate(response_text_dashboard = factor(response_text_dashboard,
+                                              levels = unique(response_text_dashboard)))
 
-    area_plot2 %>%
-      plot_ly(x = ~wgt_percent_2015*100, y = ~response_text_dashboard,
-              hoverinfo = "text",
-              hovertext = tooltip_area_trend(time_data()$wgt_percent_2015, time_data()$ci_2015),
-              type = "bar",
-              orientation = "h",
-              name = 2015,
-              marker = list(color = "#E9F2F3",
-                            line = list(color = "black",
-                                        width = 1)),
-              error_x = list(color = ci_colour,
-                             array = ~(wgt_percent_upp_2015-wgt_percent_2015)*100,
-                             arrayminus = ~(wgt_percent_2015-wgt_percent_low_2015)*100)) %>%
-      add_trace(x = ~wgt_percent_2018*100, y = ~response_text_dashboard,
+    if(time_data()$question %in% questions) {
+
+      area_plot2 %>%
+        plot_ly(x = ~wgt_percent_2015*100, y = ~response_text_dashboard,
                 hoverinfo = "text",
-                hovertext = tooltip_area_trend("2018", time_data()$wgt_percent_2018, time_data()$ci_2018),
+                hovertext = tooltip_area_trend(time_data()$wgt_percent_2015, time_data()$ci_2015),
                 type = "bar",
                 orientation = "h",
-                name = 2018,
-                marker = list(color = "#8FBFC2",
+                name = 2015,
+                marker = list(color = "#E9F2F3",
                               line = list(color = "black",
                                           width = 1)),
                 error_x = list(color = ci_colour,
-                               array = ~(wgt_percent_upp_2018-wgt_percent_2018)*100,
-                               arrayminus = ~(wgt_percent_2018-wgt_percent_low_2018)*100)) %>%
-      add_trace(x = ~wgt_percent*100, y = ~response_text_dashboard,
-                hoverinfo = "text",
-                hovertext = tooltip_area_trend("2024", time_data()$wgt_percent, time_data()$ci_2024),
-                type = "bar",
-                orientation = "h",
-                name = 2024,
-                marker = list(color = "#1E7F84",
-                              line = list(color = "black",
-                                          width = 1)),
-                error_x = list(color = ci_colour,
-                               array = ~(wgt_percent_upp-wgt_percent)*100,
-                               arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
-      layout(yaxis = list(ticksuffix = "  ",
-                          title = "",
-                          showline = T,
-                          autorange = "reversed"),
-             xaxis = list(ticksuffix = "%",
-                          title = "",
-                          range = list(0, 100),
-                          showgrid = T),
-             bargroupgap = 0.25,
-             legend = list(orientation = "h", x = 0, y = 1.2),
-             hoverlabel = list(align = "left"))
-
-
+                               array = ~(wgt_percent_upp_2015-wgt_percent_2015)*100,
+                               arrayminus = ~(wgt_percent_2015-wgt_percent_low_2015)*100)) %>%
+        add_trace(x = ~wgt_percent_2018*100, y = ~response_text_dashboard,
+                  hoverinfo = "text",
+                  hovertext = tooltip_area_trend(time_data()$wgt_percent_2018, time_data()$ci_2018),
+                  type = "bar",
+                  orientation = "h",
+                  name = 2018,
+                  marker = list(color = "#8FBFC2",
+                                line = list(color = "black",
+                                            width = 1)),
+                  error_x = list(color = ci_colour,
+                                 array = ~(wgt_percent_upp_2018-wgt_percent_2018)*100,
+                                 arrayminus = ~(wgt_percent_2018-wgt_percent_low_2018)*100)) %>%
+        add_trace(x = ~wgt_percent*100, y = ~response_text_dashboard,
+                  hoverinfo = "text",
+                  hovertext = tooltip_area_trend(time_data()$wgt_percent, time_data()$ci_2024),
+                  type = "bar",
+                  orientation = "h",
+                  name = 2024,
+                  marker = list(color = "#1E7F84",
+                                line = list(color = "black",
+                                            width = 1)),
+                  error_x = list(color = ci_colour,
+                                 array = ~(wgt_percent_upp-wgt_percent)*100,
+                                 arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
+        layout(yaxis = list(ticksuffix = "  ",
+                            title = "",
+                            showline = T,
+                            autorange = "reversed"),
+               xaxis = list(ticksuffix = "%",
+                            title = "",
+                            range = list(0, 100),
+                            showgrid = T),
+               bargroupgap = 0.25,
+               legend = list(orientation = "h", x = 0, y = 1.2),
+               hoverlabel = list(align = "left"))
   }
 
   else{
