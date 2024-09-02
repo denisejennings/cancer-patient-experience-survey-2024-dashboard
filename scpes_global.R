@@ -126,7 +126,7 @@ level_list <- list(
   "NHS board of treatment" = c("NHS Ayrshire & Arran (Board of treatment)", "NHS Borders (Board of treatment)", "NHS Dumfries & Galloway (Board of treatment)",
                                "NHS Fife (Board of treatment)", "NHS Forth Valley (Board of treatment)", "NHS Golden Jubilee (Board of treatment)", "NHS Grampian (Board of treatment)",
                                "NHS Greater Glasgow & Clyde (Board of treatment)", "NHS Highland (Board of treatment)", "NHS Lanarkshire (Board of treatment)",
-                               "NHS Lothian (Board of treatment)", "NHS Orkney", "NHS Tayside (Board of treatment)"),
+                               "NHS Lothian (Board of treatment)", "NHS Tayside (Board of treatment)"),
   "Cancer centre" = c("Aberdeen Royal Infirmary", "Beatson West of Scotland Cancer Centre", "Edinburgh Cancer Centre", "Ninewells Hospital", "Raigmore Hospital"))
 
 
