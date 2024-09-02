@@ -390,6 +390,14 @@ output$cancer_group_plot <- renderPlotly({
              "Confidence interval %: ", format({{ci}})))
   }
 
+  tooltip_cancer_group_all <- function(percent, ci){
+
+    c(paste0("All cancer groups","<br>",
+             cancer_group_data()$response_text_dashboard, "<br>",
+             "Response %: ", format(round({{percent}}*100)), "<br>",
+             "Confidence interval %: ", format({{ci}})))
+  }
+
   cancer_group_plot <- cancer_group_data() %>%
 
     # ensures responses appear in correct order
@@ -414,7 +422,7 @@ output$cancer_group_plot <- renderPlotly({
                              arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       add_trace(x = ~wgt_percent_all_cancers*100, y = ~response_text_dashboard,
                 hoverinfo = "text",
-                hovertext = tooltip_cancer_group(cancer_group_data()$wgt_percent_all_cancers, cancer_group_data()$ci_all_cancers),
+                hovertext = tooltip_cancer_group_all(cancer_group_data()$wgt_percent_all_cancers, cancer_group_data()$ci_all_cancers),
                 type = "bar",
                 orientation = "h",
                 name = "All cancer groups",
@@ -440,7 +448,7 @@ output$cancer_group_plot <- renderPlotly({
     cancer_group_plot %>%
       plot_ly(x = ~response_text_dashboard, y = ~wgt_percent*100,
               hoverinfo = "text",
-              hovertext = tooltip_cancer_group(cancer_group_data()$wgt_percent, cancer_group_data()$ci_all_cancers),
+              hovertext = tooltip_cancer_group(cancer_group_data()$wgt_percent, cancer_group_data()$ci_2024),
               type = "bar",
               name = input$select_cancer_group,
               marker = list(color = "#3F3685",
@@ -451,7 +459,7 @@ output$cancer_group_plot <- renderPlotly({
                              arrayminus = ~(wgt_percent-wgt_percent_low)*100)) %>%
       add_trace(x = ~response_text_dashboard, y = ~wgt_percent_all_cancers*100,
                 hoverinfo = "text",
-                hovertext = tooltip_cancer_group(cancer_group_data()$wgt_percent_all_cancers, cancer_group_data()$ci_2024),
+                hovertext = tooltip_cancer_group_all(cancer_group_data()$wgt_percent_all_cancers, cancer_group_data()$ci_all_cancers),
                 type = "bar",
                 name = "All cancer groups",
                 marker = list(color = "#9F9BC2",
