@@ -210,6 +210,7 @@ questions <- c("Q07", "Q46", "Q48")
       if(area_data()$question %in% questions) {
 
         area_plot %>%
+          arrange(report_area_name,response_text_dashboard) %>%
         plot_ly(x = ~wgt_percent*100, y = ~response_text_dashboard,
                 hoverinfo = "text",
                 hovertext = tooltip_area,
@@ -237,6 +238,7 @@ questions <- c("Q07", "Q46", "Q48")
       else {
 
        area_plot %>%
+          arrange(report_area_name,response_text_dashboard) %>%
         plot_ly(x = ~response_text_dashboard, y = ~wgt_percent*100,
                 hoverinfo = "text",
                 hovertext = tooltip_area,
