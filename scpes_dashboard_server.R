@@ -44,7 +44,13 @@ res_auth <- secure_server(check_credentials = check_credentials(credentials))
       filter(topic == input$survey_section,
              question_text == input$select_question,
              report_area_name %in% c(input$select_report,
-                                     input$select_comparator))
+                                     input$select_comparator)) %>%
+      mutate(report_area_name = factor(report_area_name, levels = unique(report_area_name))) %>%
+
+      # add so response options are displayed in correct order
+      mutate(response_text_dashboard = factor(response_text_dashboard,
+                                              levels = unique(response_text_dashboard))) %>%
+      arrange(report_area_name,response_text_dashboard)
   })
 
 # Data for use in area data tab by year
@@ -191,20 +197,17 @@ questions <- c("Q07", "Q46", "Q48")
   dropdown_items <- c(input$select_report,
                         input$select_comparator)
 
-  tooltip_area <- c(paste0(area_data()$report_area_name, "<br>",
-                           area_data()$response_text_dashboard, "<br>",
-                                "Response %: ", format(round(area_data()$wgt_percent*100)), "<br>",
-                                "Confidence interval %: ", format(area_data()$ci_2024)))
-
-  area_plot <- area_data() %>%
+   area_plot <- area_data() %>%
         filter(report_area_name %in% dropdown_items) %>%
 
         # add unique to levels to ensure correct functionality
         mutate(report_area_name = factor(report_area_name, levels = unique(dropdown_items))) %>%
 
-        # add so reponse options are displayed in correct order
+        # add so response options are displayed in correct order
         mutate(response_text_dashboard = factor(response_text_dashboard,
-                                                levels = unique(response_text_dashboard)))
+                                                levels = unique(response_text_dashboard))) %>%
+        arrange(report_area_name,response_text_dashboard)
+
 
       # use if else statement to produce horizontal or vertical charts depending on question response length
       if(area_data()$question %in% questions) {
@@ -213,7 +216,10 @@ questions <- c("Q07", "Q46", "Q48")
           arrange(report_area_name,response_text_dashboard) %>%
         plot_ly(x = ~wgt_percent*100, y = ~response_text_dashboard,
                 hoverinfo = "text",
-                hovertext = tooltip_area,
+                hovertext = ~paste0(report_area_name,"<br>",
+                                    response_text_dashboard,"<br>",
+                                    "Response %: ", format(round(wgt_percent*100)), "<br>",
+                                    "Confidence interval %: ", format(ci_2024)),
                 color = ~report_area_name,
                 colors = plot1_colours,
                 type = "bar",
@@ -241,7 +247,10 @@ questions <- c("Q07", "Q46", "Q48")
           arrange(report_area_name,response_text_dashboard) %>%
         plot_ly(x = ~response_text_dashboard, y = ~wgt_percent*100,
                 hoverinfo = "text",
-                hovertext = tooltip_area,
+                hovertext = ~paste0(report_area_name,"<br>",
+                                    response_text_dashboard,"<br>",
+                                    "Response %: ", format(round(wgt_percent*100)), "<br>",
+                                    "Confidence interval %: ", format(ci_2024)),
                 color = ~report_area_name,
                 colors = plot1_colours,
                 type = "bar",
