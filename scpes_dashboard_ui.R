@@ -6,7 +6,7 @@
 
 
 # Create main page with tabs and required CSS settings
-ui <- secure_app( #uncomment if needing password protection
+ui <- #secure_app( #uncomment if needing password protection
   fluidPage(
 tagList( #needed for shinyjs
   useShinyjs(),  # Include shinyjs
@@ -262,7 +262,7 @@ tabPanel(title = "Home", icon = icon("info-circle"), value = "home",
              ), # tabPanel
 )# navbarPage
 )# tagList
- )  #secureApp
+ #)  #secureApp
 ) # fluidPage
 
 ################################################################################

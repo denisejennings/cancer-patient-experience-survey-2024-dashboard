@@ -5,7 +5,7 @@
 # ------------------------------------------------------------------------------
 
 # Set password protection
-credentials <- readRDS("admin/credentials.rds")
+#credentials <- readRDS("admin/credentials.rds")
 
 
 ################################################################################
@@ -15,7 +15,7 @@ credentials <- readRDS("admin/credentials.rds")
 server <- function(input, output, session) {
 
 # Shinymanager Auth
-res_auth <- secure_server(check_credentials = check_credentials(credentials))
+#res_auth <- secure_server(check_credentials = check_credentials(credentials))
 
   # Set the dropdown menu so only questions relevant to the survey section selected appear
   observeEvent(
